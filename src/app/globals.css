@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Labyrinth CodeSprint — Design Tokens
+   Values sampled directly from the official Labyrinth logo (primary red)
+   and the brand spec (all other colors). Everything downstream (Tailwind
+   config, shadcn components) reads from these variables — colors are never
+   hardcoded a second time anywhere else in the codebase.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 0 0% 4%; /* #0B0B0B */
+    --surface: 0 0% 8%; /* #151515 */
+    --card: 0 0% 12%; /* #1E1E1E */
+    --card-foreground: 0 0% 100%;
+
+    /* Text */
+    --foreground: 0 0% 100%; /* #FFFFFF primary text */
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 74%; /* #BDBDBD secondary text */
+
+    /* Structure */
+    --border: 0 0% 17%; /* #2C2C2C */
+    --radius: 0.75rem;
+
+    /* Brand */
+    --primary: 10 92% 42%; /* #CC2809 — sampled from logo */
+    --primary-foreground: 0 0% 100%;
+
+    /* Status */
+    --success: 142 71% 45%; /* #22C55E */
+    --warning: 38 92% 50%; /* #F59E0B */
+    --error: 0 84% 60%; /* #EF4444 */
+
+    /* Leaderboard rank highlights */
+    --gold: 46 81% 52%;
+    --silver: 216 15% 81%;
+    --bronze: 26 56% 51%;
+
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      'cv11' 1,
+      'ss01' 1;
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+
+  /* Slim, dark, on-brand scrollbar instead of the default browser chrome */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Consistent, visible focus ring for keyboard/accessibility use */
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Thin gradient hairline used under section headers / hero divider */
+  .brand-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--primary) / 0.6) 50%,
+      transparent 100%
+    );
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

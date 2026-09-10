@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+.codebase-memory
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+/prisma/dev.db
+
+# testing
+/coverage

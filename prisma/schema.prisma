@@ -1,0 +1,403 @@
+// ============================================================================
+// Labyrinth CodeSprint Leaderboard — Database Schema
+// ============================================================================
+// Design notes (Phase 1):
+//
+// 1. Normalized around `Event` so future Labyrinth events (not just
+//    CodeSprint) can reuse this schema without a redesign.
+// 2. Checkpoints are modeled as their own table (not fixed columns) so the
+//    number of checkpoints per event is configurable. CodeSprint ships with
+//    2 checkpoints (order 1-2), enforced at the seed/application level.
+// 3. `Score` is a join table between Team and Checkpoint holding the raw
+//    integer value. Totals are NEVER stored — they are always derived
+//    (SUM of scores) to guarantee they can never drift from source data.
+//    Ranking/tie-breaking logic lives in the service layer (Phase 5/8),
+//    operating on Checkpoint.order (2 -> 1) plus Team.createdAt.
+// 4. Admins are fully separate from Teams — participants never get a login.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A Labyrinth event (CodeSprint today, future events later).
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  checkpoints   Checkpoint[]
+  teams         Team[]
+  registrations Registration[]
+  announcements Announcement[]
+
+  @@map("events")
+}
+
+/// A single evaluation checkpoint within an event (e.g. "Checkpoint 1").
+/// `order` drives both display order and tie-break precedence.
+model Checkpoint {
+  id                     String   @id @default(cuid())
+  eventId                String
+  label                  String
+  order                  Int
+  maxScore               Int?
+  isActive               Boolean  @default(false)
+  leaderboardReleaseDate DateTime?
+  createdAt              DateTime @default(now())
+
+  event            Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  scores           Score[]
+  evaluations      Evaluation[]
+  githubActivities GithubActivity[]
+  submissions      WeeklySubmission[]
+
+  @@unique([eventId, order])
+  @@map("checkpoints")
+}
+
+/// A participating team. Teams cannot register or log in themselves —
+/// organizers manage teams entirely through the admin dashboard.
+model Team {
+  id        String   @id @default(cuid())
+  eventId   String
+  name      String
+  college   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event        Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  scores       Score[]
+  participants Participant[]
+  project      Project?
+  evaluations  Evaluation[]
+  submissions  WeeklySubmission[]
+  achievements Achievement[]
+
+  @@unique([eventId, name])
+  @@map("teams")
+}
+
+enum SubmissionVerificationStatus {
+  QUEUED
+  VERIFIED
+  VERIFICATION_REQUIRED
+  ANALYSIS_FAILED
+}
+
+/// A team's immutable project hand-in for one event week.
+model WeeklySubmission {
+  id                 String                       @id @default(cuid())
+  teamId             String
+  checkpointId       String
+  projectTitle       String
+  projectDescription String
+  problemStatement   String                       @default("")
+  keyFeatures        String                       @default("")
+  technologyStack    String                       @default("")
+  aiToolsUsed        String?
+  repositoryUrl      String
+  demoUrl            String?
+  demoVideoUrl       String?
+  presentationUrl    String?
+  additionalNotes    String?
+  verificationStatus SubmissionVerificationStatus @default(VERIFICATION_REQUIRED)
+  submittedAt        DateTime                     @default(now())
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+
+  team       Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint           @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+  analytics  SubmissionAnalytics?
+
+  @@unique([teamId, checkpointId])
+  @@index([checkpointId])
+  @@map("weekly_submissions")
+}
+
+/// Point-in-time GitHub analysis attached to exactly one weekly submission.
+model SubmissionAnalytics {
+  id               String    @id @default(cuid())
+  submissionId     String    @unique
+  totalCommits     Int       @default(0)
+  pullRequestCount Int       @default(0)
+  activeDays       Int       @default(0)
+  lastCommitAt     DateTime?
+  repositoryHealth String
+  contributors     Json
+  memberMetrics    Json
+  syncedAt         DateTime  @default(now())
+
+  submission WeeklySubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("submission_analytics")
+}
+
+/// The score a team earned at a specific checkpoint. Composite-unique so a
+/// team can have at most one score per checkpoint (upserted on save).
+model Score {
+  id           String   @id @default(cuid())
+  teamId       String
+  checkpointId String
+  value        Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, checkpointId])
+  @@map("scores")
+}
+
+/// One project per team, used as the source of truth for repository syncing.
+model Project {
+  id          String   @id @default(cuid())
+  teamId      String   @unique
+  name        String
+  description String?
+  repoUrl     String?
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+/// Rubric detail for a team's weekly review. `total` is mirrored into Score.
+model Evaluation {
+  id             String   @id @default(cuid())
+  teamId         String
+  checkpointId   String
+  innovation     Int      @default(0)
+  technical      Int      @default(0)
+  ui             Int      @default(0)
+  documentation  Int      @default(0)
+  githubScore    Int      @default(0)
+  comments       String?
+  total          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, checkpointId])
+  @@map("evaluations")
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A public request which an organizer may convert into a team.
+model Registration {
+  id                 String             @id @default(cuid())
+  eventId            String
+  teamName           String
+  projectName        String
+  projectDescription String
+  college            String
+  repositoryUrl      String?
+  status             RegistrationStatus @default(PENDING)
+  reviewedAt         DateTime?
+  rejectionReason    String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  event   Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  members RegistrationMember[]
+
+  @@index([eventId, status])
+  @@map("registrations")
+}
+
+model RegistrationMember {
+  id             String  @id @default(cuid())
+  registrationId String
+  name           String
+  email          String
+  phone          String?
+  className      String?
+  regNo          String?
+  githubUsername String
+  isLeader       Boolean @default(false)
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@map("registration_members")
+}
+
+/// Organizer/admin account. Participants never appear in this table.
+model Admin {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  displayName  String?
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  approvedTokenLedgerEntries TokenLedger[]
+  auditLogs                  AuditLog[]
+
+  @@map("admins")
+}
+
+/// A participant identity linked to a GitHub account. Team assignment is
+/// nullable because a participant may authenticate before organizer assignment.
+model Participant {
+  id             String   @id @default(cuid())
+  githubId       String   @unique
+  githubUsername String
+  name           String?
+  className      String?
+  regNo          String?
+  avatarUrl      String?
+  teamId         String?
+  tokenBalance   Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  team              Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  githubActivities  GithubActivity[]
+  tokenLedger       TokenLedger[]
+  ethicsAcceptances EthicsAcceptance[]
+  achievements      Achievement[]
+  notifications     Notification[]
+
+  @@index([teamId])
+  @@map("participants")
+}
+
+/// GitHub activity captured for a participant and sprint checkpoint.
+model GithubActivity {
+  id            String    @id @default(cuid())
+  participantId String
+  repoUrl       String
+  commitCount   Int       @default(0)
+  prCount       Int       @default(0)
+  activeDays    Int       @default(0)
+  lastCommitAt  DateTime?
+  sprintWeekId  String
+  syncedAt      DateTime  @default(now())
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  sprintWeek  Checkpoint  @relation(fields: [sprintWeekId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, sprintWeekId, repoUrl])
+  @@index([sprintWeekId])
+  @@map("github_activities")
+}
+
+enum TokenReason {
+  STREAK
+  HOD_APPROVED
+  SPRINT_WIN
+  MANUAL
+}
+
+/// Append-only token movement. Balance is derived from ledger entries.
+model TokenLedger {
+  id            String      @id @default(cuid())
+  participantId String
+  amount        Int
+  reason        TokenReason
+  approvedById  String?
+  createdAt     DateTime    @default(now())
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  approvedBy  Admin?      @relation(fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([participantId, createdAt])
+  @@index([approvedById])
+  @@map("token_ledger")
+}
+
+model EthicsAcceptance {
+  id            String   @id @default(cuid())
+  participantId String
+  acceptedAt    DateTime @default(now())
+  version       String
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, version])
+  @@map("ethics_acceptances")
+}
+
+/// System-wide audit log for all admin actions
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  entityType String?
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  createdAt  DateTime @default(now())
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+/// Organizer announcements broadcasted to all participants.
+model Announcement {
+  id        String   @id @default(cuid())
+  eventId   String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("announcements")
+}
+
+/// Achievements/badges earned by participants or teams.
+model Achievement {
+  id            String   @id @default(cuid())
+  participantId String?
+  teamId        String?
+  badgeName     String
+  description   String?
+  earnedAt      DateTime @default(now())
+
+  participant Participant? @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  team        Team?        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+  @@index([teamId])
+  @@map("achievements")
+}
+
+/// Participant notifications
+model Notification {
+  id            String   @id @default(cuid())
+  participantId String
+  type          String // e.g., "SUBMISSION_APPROVED", "EVALUATION_COMPLETED", "ANNOUNCEMENT"
+  title         String
+  message       String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId, isRead])
+  @@map("notifications")
+}
