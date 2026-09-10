@@ -47,7 +47,17 @@ export const AUTH = {
  * (ISO 8601, e.g. "2026-09-12T09:00:00+05:30") without touching code.
  */
 export const EVENT_START_DATE_ISO =
-  process.env.NEXT_PUBLIC_EVENT_START_DATE ?? '2026-09-12T09:00:00+05:30';
+  process.env.NEXT_PUBLIC_EVENT_START_DATE ?? '2026-09-11T09:00:00+05:30';
+
+/**
+ * Centralized schedule for CodeSprint.
+ * The source of truth for submission windows and UI countdowns.
+ */
+export const EVENT_SCHEDULE = {
+  START: EVENT_START_DATE_ISO,
+  WEEK_1_DEADLINE: process.env.NEXT_PUBLIC_WEEK_1_DEADLINE ?? '2026-09-18T23:59:59+05:30',
+  WEEK_2_DEADLINE: process.env.NEXT_PUBLIC_WEEK_2_DEADLINE ?? '2026-09-25T23:59:59+05:30',
+} as const;
 
 export const ROUTES = {
   HOME: '/',
