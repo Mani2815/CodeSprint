@@ -5,7 +5,6 @@ import { Reveal } from '@/components/shared/motion';
 import { Eyebrow, Lead } from '@/components/shared/typography';
 import { Logo } from '@/components/shared/logo';
 import Image from 'next/image';
-import { Countdown } from '@/features/landing/components/countdown';
 import { ORG_NAME, ROUTES } from '@/lib/constants';
 
 export function Hero() {
@@ -46,10 +45,6 @@ export function Hero() {
             three create a brand-new project every week, receive faculty evaluations, and earn
             cumulative points to compete for the overall CodeSprint Championship.
           </p>
-        </Reveal>
-
-        <Reveal delay={0.25}>
-          <Countdown />
         </Reveal>
 
         <Reveal delay={0.3} className="flex flex-col gap-3 sm:flex-row">
