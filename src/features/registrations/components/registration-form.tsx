@@ -6,13 +6,7 @@ import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 const fields = ['name', 'email', 'phone', 'className', 'regNo'] as const;
 type Profile = {
   username: string;
@@ -174,40 +168,26 @@ export function RegistrationForm() {
                             : 'Registration Number'}
                     <span className="ml-1 text-error">*</span>
                   </Label>
-                  {field === 'className' ? (
-                    <Select name={`member-${index}-${field}`} required>
-                      <SelectTrigger id={`member-${index}-${field}`}>
-                        <SelectValue placeholder="Select your class" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1 MCA A">1 MCA A</SelectItem>
-                        <SelectItem value="1 MCA B">1 MCA B</SelectItem>
-                        <SelectItem value="1 M.Sc AIM">1 M.Sc AIM</SelectItem>
-                        <SelectItem value="4 MCA A">4 MCA A</SelectItem>
-                        <SelectItem value="4 MCA B">4 MCA B</SelectItem>
-                        <SelectItem value="4 M.Sc AIM">4 M.Sc AIM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      id={`member-${index}-${field}`}
-                      name={`member-${index}-${field}`}
-                      type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
-                      required
-                      maxLength={field === 'phone' ? 10 : undefined}
-                      minLength={field === 'phone' ? 10 : undefined}
-                      pattern={field === 'phone' ? '\\d{10}' : undefined}
-                      placeholder={
-                        field === 'phone'
-                          ? 'e.g. 9876543210'
-                          : field === 'regNo'
-                            ? 'e.g. 2547201'
-                            : field === 'name'
-                              ? 'Full Name'
+                  <Input
+                    id={`member-${index}-${field}`}
+                    name={`member-${index}-${field}`}
+                    type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                    required
+                    maxLength={field === 'phone' ? 10 : undefined}
+                    minLength={field === 'phone' ? 10 : undefined}
+                    pattern={field === 'phone' ? '\\d{10}' : undefined}
+                    placeholder={
+                      field === 'phone'
+                        ? 'e.g. 9876543210'
+                        : field === 'regNo'
+                          ? 'e.g. 2547201'
+                          : field === 'name'
+                            ? 'Full Name'
+                            : field === 'className'
+                              ? 'e.g. 1 MCA A'
                               : 'Email Address'
-                      }
-                    />
-                  )}
+                    }
+                  />
                 </div>
               ))}
               <div className="sm:col-span-2">
