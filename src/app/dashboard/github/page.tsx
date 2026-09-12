@@ -6,7 +6,9 @@ import { H1, Muted } from '@/components/shared/typography';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GitCommitHorizontal, GitPullRequest, Calendar, Github, Activity } from 'lucide-react';
+import { GitCommitHorizontal, GitPullRequest, Calendar, Activity } from 'lucide-react';
+import { GithubConnectForm } from '@/features/dashboard/components/github-connect-form';
+import { GithubSyncButton } from '@/features/dashboard/components/github-sync-button';
 
 export default async function GithubAnalyticsPage() {
   const session = await requireParticipantSession();
@@ -82,19 +84,23 @@ export default async function GithubAnalyticsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6 lg:p-8">
-      <div>
-        <H1 className="text-3xl">GitHub Analytics</H1>
-        <Muted className="mt-2">Insights into your team's collaboration and codebase health.</Muted>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <H1 className="text-3xl">GitHub Analytics</H1>
+          <Muted className="mt-2">Insights into your team's collaboration and codebase health.</Muted>
+        </div>
+        {latestSubmission && (
+          <div className="flex items-center gap-4">
+            <Muted className="text-xs">
+              Last synced: {latestSubmission.analytics?.syncedAt ? new Date(latestSubmission.analytics.syncedAt).toLocaleString() : 'Never'}
+            </Muted>
+            <GithubSyncButton />
+          </div>
+        )}
       </div>
 
       {!latestSubmission ? (
-        <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
-            <Github className="mx-auto mb-4 h-10 w-10 opacity-50" />
-            <p className="font-medium text-foreground">No repositories connected</p>
-            <p className="mt-1 text-sm">Submit your first project to unlock GitHub analytics.</p>
-          </CardContent>
-        </Card>
+        <GithubConnectForm />
       ) : (
         <>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -154,7 +160,7 @@ export default async function GithubAnalyticsPage() {
               </CardHeader>
               <CardContent className="flex-1">
                 <div className="space-y-6">
-                  {memberStats.map((member) => {
+                  {memberStats.map((member, index) => {
                     const percentage =
                       totalTeamCommits > 0
                         ? Math.round((member.totalCommits / totalTeamCommits) * 100)
@@ -162,9 +168,11 @@ export default async function GithubAnalyticsPage() {
                     const isTop = topContributor?.id === member.id && member.totalCommits > 0;
 
                     return (
-                      <div key={member.id} className="flex items-center gap-4">
-                        <Avatar className="h-10 w-10 border border-border">
-                          <AvatarImage src={member.avatarUrl ?? undefined} />
+                      <div key={member.id} className="space-y-3 pb-4 border-b border-border/50 last:border-0 last:pb-0">
+                        <div className="text-sm font-semibold text-muted-foreground">Participant {index + 1}</div>
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-10 w-10 border border-border">
+                            <AvatarImage src={member.avatarUrl ?? undefined} />
                           <AvatarFallback>
                             {member.githubUsername.charAt(0).toUpperCase()}
                           </AvatarFallback>
@@ -193,6 +201,7 @@ export default async function GithubAnalyticsPage() {
                           <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
                             <span>{member.totalCommits} commits</span>
                             <span>{member.totalPRs} PRs</span>
+                          </div>
                           </div>
                         </div>
                       </div>

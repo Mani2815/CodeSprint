@@ -110,6 +110,7 @@ model WeeklySubmission {
   presentationUrl    String?
   additionalNotes    String?
   verificationStatus SubmissionVerificationStatus @default(VERIFICATION_REQUIRED)
+  isDraft            Boolean                      @default(false)
   submittedAt        DateTime                     @default(now())
   createdAt          DateTime                     @default(now())
   updatedAt          DateTime                     @updatedAt

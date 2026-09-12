@@ -107,7 +107,28 @@ export async function createWeeklySubmission(
   const existing = await prisma.weeklySubmission.findUnique({
     where: { teamId_checkpointId: { teamId, checkpointId: input.checkpointId } },
   });
-  if (existing) throw new DuplicateSubmissionError();
+  if (existing && !existing.isDraft) throw new DuplicateSubmissionError();
+
+  if (existing && existing.isDraft) {
+    return prisma.weeklySubmission.update({
+      where: { id: existing.id },
+      data: {
+        projectTitle: input.projectTitle.trim(),
+        projectDescription: input.projectDescription.trim(),
+        problemStatement: input.problemStatement.trim(),
+        keyFeatures: input.keyFeatures.trim(),
+        technologyStack: input.technologyStack.trim(),
+        aiToolsUsed: clean(input.aiToolsUsed),
+        repositoryUrl: input.repositoryUrl.trim(),
+        demoUrl: clean(input.demoUrl),
+        demoVideoUrl: clean(input.demoVideoUrl),
+        presentationUrl: clean(input.presentationUrl),
+        additionalNotes: clean(input.additionalNotes),
+        isDraft: false,
+        submittedAt: new Date(),
+      },
+    });
+  }
 
   return prisma.weeklySubmission.create({
     data: {
@@ -131,14 +152,14 @@ export async function createWeeklySubmission(
 
 export async function getTeamSubmissions(teamId: string) {
   return prisma.weeklySubmission.findMany({
-    where: { teamId },
+    where: { teamId, isDraft: false },
     include: { checkpoint: true, analytics: true },
     orderBy: { checkpoint: { order: 'desc' } },
   });
 }
 export async function listSubmissions(eventId: string) {
   return prisma.weeklySubmission.findMany({
-    where: { team: { eventId } },
+    where: { team: { eventId }, isDraft: false },
     include: { team: true, checkpoint: true, analytics: true },
     orderBy: [{ checkpoint: { order: 'desc' } }, { submittedAt: 'desc' }],
   });
