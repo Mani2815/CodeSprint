@@ -42,7 +42,7 @@ export function AboutSection() {
 
         <Reveal delay={0.1} className="mt-6 max-w-2xl text-center sm:text-left">
           <Text>
-            CodeSprint is {ORG_NAME}&apos;s signature 4-week software development competition. Teams
+            CodeSprint is {ORG_NAME}&apos;s signature 2-week software development competition. Teams
             race against the clock to design, build, and deliver a new project each week, facing
             weekly faculty evaluations that determine their standings.
           </Text>

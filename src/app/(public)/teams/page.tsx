@@ -24,7 +24,7 @@ import { formatScore } from '@/utils/format';
 
 export const metadata: Metadata = {
   title: 'Teams',
-  description: 'Browse participating teams competing in the 4-week CodeSprint.',
+  description: 'Browse participating teams competing in the 2-week CodeSprint.',
 };
 
 export const dynamic = 'force-dynamic';
