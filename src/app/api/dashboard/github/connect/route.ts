@@ -96,3 +96,53 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user.participantId || session.user.role === 'revoked') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const participant = await getParticipantById(session.user.participantId);
+    if (!participant?.teamId) {
+      return NextResponse.json({ error: 'You are not assigned to a team.' }, { status: 403 });
+    }
+
+    const eventId = await getActiveEventId(ACTIVE_EVENT_SLUG);
+    
+    // Find the currently active checkpoint
+    const activeCheckpoint = await prisma.checkpoint.findFirst({
+      where: { eventId, isActive: true },
+      orderBy: { order: 'asc' },
+    });
+
+    if (!activeCheckpoint) {
+      return NextResponse.json({ error: 'No active sprint week is open.' }, { status: 400 });
+    }
+
+    const existing = await prisma.weeklySubmission.findUnique({
+      where: { teamId_checkpointId: { teamId: participant.teamId, checkpointId: activeCheckpoint.id } },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'No repository is currently connected.' }, { status: 404 });
+    }
+
+    if (!existing.isDraft) {
+      return NextResponse.json({ error: 'Cannot remove a finalized submission.' }, { status: 400 });
+    }
+
+    await prisma.weeklySubmission.delete({
+      where: { id: existing.id },
+    });
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: unknown) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

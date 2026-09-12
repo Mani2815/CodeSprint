@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GitCommitHorizontal, GitPullRequest, Calendar, Activity } from 'lucide-react';
 import { GithubConnectForm } from '@/features/dashboard/components/github-connect-form';
 import { GithubSyncButton } from '@/features/dashboard/components/github-sync-button';
+import { GithubRemoveButton } from '@/features/dashboard/components/github-remove-button';
 
 export default async function GithubAnalyticsPage() {
   const session = await requireParticipantSession();
@@ -43,6 +44,27 @@ export default async function GithubAnalyticsPage() {
 
   const team = participant.team!;
   const latestSubmission = team.submissions[0];
+
+  const activeCheckpoint = await prisma.checkpoint.findFirst({
+    where: { eventId, isActive: true },
+    orderBy: { order: 'asc' },
+  });
+
+  const hasActiveSubmission = latestSubmission?.checkpointId === activeCheckpoint?.id;
+  const showConnectForm = !latestSubmission || (activeCheckpoint && !hasActiveSubmission);
+
+  // If showing connect form, we do not show old analytics
+  if (showConnectForm) {
+    return (
+      <div className="mx-auto max-w-5xl space-y-8 p-6 lg:p-8">
+        <div>
+          <H1 className="text-3xl">GitHub Analytics</H1>
+          <Muted className="mt-2">Insights into your team's collaboration and codebase health.</Muted>
+        </div>
+        <GithubConnectForm />
+      </div>
+    );
+  }
 
   // Read stats from the single source of truth (SubmissionAnalytics)
   const analytics = latestSubmission?.analytics;
@@ -94,15 +116,15 @@ export default async function GithubAnalyticsPage() {
             <Muted className="text-xs">
               Last synced: {latestSubmission.analytics?.syncedAt ? new Date(latestSubmission.analytics.syncedAt).toLocaleString() : 'Never'}
             </Muted>
+            {latestSubmission.isDraft && (
+              <GithubRemoveButton />
+            )}
             <GithubSyncButton />
           </div>
         )}
       </div>
 
-      {!latestSubmission ? (
-        <GithubConnectForm />
-      ) : (
-        <>
+      <>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardContent className="p-6">
@@ -253,7 +275,6 @@ export default async function GithubAnalyticsPage() {
             </Card>
           </div>
         </>
-      )}
     </div>
   );
 }
