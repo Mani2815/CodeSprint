@@ -13,7 +13,7 @@ const member = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().email(),
   phone: z.string().regex(/^\d{10}$/, 'Phone number must be exactly 10 digits'),
-  className: z.enum(['2 MCA A', '2 MCA B', '2 M.Sc AIM', '5 MCA A', '5 MCA B', '5 M.Sc AIM']),
+  className: z.string().trim().min(1, 'Class name is required'),
   regNo: z.string().trim().min(1, 'Registration number is required').max(50),
   githubUsername: z.string().trim().min(1).max(39),
   isLeader: z.boolean(),
