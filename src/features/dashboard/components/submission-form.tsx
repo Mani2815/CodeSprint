@@ -177,7 +177,7 @@ export function SubmissionForm({
           <div className="mb-6 rounded-md border border-warning/20 bg-warning/10 p-4 text-warning">
             <div className="flex items-center gap-2 font-medium">
               <AlertCircle className="h-5 w-5" />
-              Submission Window Closed
+              Submission Window Locked
             </div>
             <p className="mt-1 text-sm text-warning/90">
               Submissions open every Friday. You can prepare your submission now, but it can only be
