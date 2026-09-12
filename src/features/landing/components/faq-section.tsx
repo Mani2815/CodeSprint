@@ -11,7 +11,7 @@ const faqs = [
   },
   {
     q: 'Can we change team members after registration?',
-    a: 'Teams are formed by the organizers after individual participant registrations are collected. Each team will typically consist of 1 PG student and 2 UG students, with team formation also considering compatible skills and technology interests. Once your team has been finalized and registered on the portal, team members cannot be changed.',
+    a: 'Teams are formed by the organizers after individual participant registrations are collected. Each team will typically consist of 2 members, with team formation also considering compatible skills and technology interests. Once your team has been finalized and registered on the portal, team members cannot be changed.',
   },
   {
     q: 'How is the evaluation done?',
