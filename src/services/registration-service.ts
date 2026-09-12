@@ -135,24 +135,34 @@ export async function approveRegistration(id: string) {
       });
       for (const member of registration.members) {
         const githubUsername = member.githubUsername;
-        await tx.participant.upsert({
-          where: { githubId: `registration:${githubUsername.toLowerCase()}` },
-          create: {
-            githubId: `registration:${githubUsername.toLowerCase()}`,
-            githubUsername,
-            name: member.name,
-            teamId: team.id,
-            className: member.className,
-            regNo: member.regNo,
-          },
-          update: {
-            githubUsername,
-            name: member.name,
-            teamId: team.id,
-            className: member.className,
-            regNo: member.regNo,
-          },
+        
+        // Find if they already have an account (could be a real githubId from a previous team that was deleted)
+        const existingParticipant = await tx.participant.findFirst({
+          where: { githubUsername: { equals: githubUsername, mode: 'insensitive' } },
         });
+
+        if (existingParticipant) {
+          await tx.participant.update({
+            where: { id: existingParticipant.id },
+            data: {
+              name: member.name,
+              teamId: team.id,
+              className: member.className,
+              regNo: member.regNo,
+            },
+          });
+        } else {
+          await tx.participant.create({
+            data: {
+              githubId: `registration:${githubUsername.toLowerCase()}`,
+              githubUsername,
+              name: member.name,
+              teamId: team.id,
+              className: member.className,
+              regNo: member.regNo,
+            },
+          });
+        }
       }
       const updated = await tx.registration.update({
         where: { id },
