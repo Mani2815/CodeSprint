@@ -41,7 +41,7 @@ export function Hero() {
 
         <Reveal delay={0.2} className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           <p>
-            CodeSprint is Labyrinth&apos;s premier 4-week software development competition. Teams of
+            CodeSprint is Labyrinth&apos;s premier 2-week software development competition. Teams of
             three create a brand-new project every week, receive faculty evaluations, and earn
             cumulative points to compete for the overall CodeSprint Championship.
           </p>
