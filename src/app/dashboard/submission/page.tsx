@@ -2,6 +2,7 @@ import { requireParticipantSession } from '@/lib/participant-auth';
 import { getActiveEventId } from '@/services/event-service';
 import { ACTIVE_EVENT_SLUG } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
+import { isEventFriday } from '@/lib/date-utils';
 import { SubmissionForm } from '@/features/dashboard/components/submission-form';
 import { H1, Muted } from '@/components/shared/typography';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,6 +27,7 @@ export default async function SubmissionPage() {
   });
 
   const activeCheckpoints = allCheckpoints.filter((c) => c.isActive);
+  const isFriday = isEventFriday();
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6 lg:p-8">
@@ -43,7 +45,7 @@ export default async function SubmissionPage() {
           </Muted>
         </div>
       ) : activeCheckpoints.length > 0 ? (
-        <SubmissionForm activeCheckpoints={activeCheckpoints} />
+        <SubmissionForm activeCheckpoints={activeCheckpoints} isFriday={isFriday} />
       ) : (
         <div className="space-y-6">
           <div className="rounded-xl border border-dashed bg-surface/30 p-12 text-center">

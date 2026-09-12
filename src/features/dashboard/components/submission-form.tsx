@@ -46,7 +46,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function SubmissionForm({ activeCheckpoints }: { activeCheckpoints: Checkpoint[] }) {
+export function SubmissionForm({
+  activeCheckpoints,
+  isFriday,
+}: {
+  activeCheckpoints: Checkpoint[];
+  isFriday: boolean;
+}) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isValidating, setIsValidating] = React.useState(false);
@@ -167,6 +173,18 @@ export function SubmissionForm({ activeCheckpoints }: { activeCheckpoints: Check
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {!isFriday && (
+          <div className="mb-6 rounded-md border border-warning/20 bg-warning/10 p-4 text-warning">
+            <div className="flex items-center gap-2 font-medium">
+              <AlertCircle className="h-5 w-5" />
+              Submission Window Closed
+            </div>
+            <p className="mt-1 text-sm text-warning/90">
+              Submissions open every Friday. You can prepare your submission now, but it can only be
+              submitted on Friday.
+            </p>
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -426,7 +444,11 @@ export function SubmissionForm({ activeCheckpoints }: { activeCheckpoints: Check
                   By submitting, I confirm this repository belongs to our team.
                 </p>
               </div>
-              <Button type="submit" size="lg" disabled={isSubmitting || !repoStatus?.isValid}>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isSubmitting || !repoStatus?.isValid || !isFriday}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
