@@ -19,6 +19,8 @@ import {
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HistoryPage() {
   const session = await requireParticipantSession();
   const eventId = await getActiveEventId(ACTIVE_EVENT_SLUG);
@@ -62,8 +64,10 @@ export default async function HistoryPage() {
         {checkpoints.map((checkpoint, index) => {
           const submission = submissions.find((s) => s.checkpointId === checkpoint.id);
           const evaluation = evaluations.find((e) => e.checkpointId === checkpoint.id);
+          
+          const activeIndex = checkpoints.findIndex((c) => c.isActive);
           const isLocked =
-            !checkpoint.isActive && !submission && checkpoints.findIndex((c) => c.isActive) > index;
+            !checkpoint.isActive && !submission && (activeIndex === -1 || index > activeIndex);
 
           return (
             <Card key={checkpoint.id} className={isLocked ? 'opacity-60' : ''}>

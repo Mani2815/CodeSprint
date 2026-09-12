@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Lock } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SubmissionPage() {
   const session = await requireParticipantSession();
   const eventId = await getActiveEventId(ACTIVE_EVENT_SLUG);
