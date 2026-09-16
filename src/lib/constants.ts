@@ -73,6 +73,7 @@ export const ROUTES = {
   ADMIN_REGISTRATIONS: '/admin/registrations',
   ADMIN_EVALUATIONS: '/admin/evaluations',
   ADMIN_SUBMISSIONS: '/admin/submissions',
+  ADMIN_GITHUB_ACTIVITY: '/admin/github-activity',
   ADMIN_GITHUB_SYNC: '/admin/github-sync',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   PARTICIPANT_LOGIN: '/login',
