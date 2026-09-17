@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getActiveEventId } from '@/services/event-service';
-import { ACTIVE_EVENT_SLUG, EVENT_SCHEDULE } from '@/lib/constants';
+import { ACTIVE_EVENT_SLUG } from '@/lib/constants';
 import { getLeaderboard } from '@/services/leaderboard-service';
 
 export async function getParticipantDashboardData(participantId: string) {
@@ -34,20 +34,12 @@ export async function getParticipantDashboardData(participantId: string) {
 
   const currentWeek = activeCheckpoint?.label ?? 'Week 1';
   let nextDeadline = new Date();
-  if (activeCheckpoint) {
-    if (activeCheckpoint.order === 1) {
-      nextDeadline = new Date(EVENT_SCHEDULE.WEEK_1_DEADLINE);
-    } else if (activeCheckpoint.order === 2) {
-      nextDeadline = new Date(EVENT_SCHEDULE.WEEK_2_DEADLINE);
-    }
+  if (activeCheckpoint?.submissionCloseDate) {
+    nextDeadline = activeCheckpoint.submissionCloseDate;
   }
 
-  const hasReleasedLeaderboard = await prisma.checkpoint.findFirst({
-    where: { eventId, leaderboardReleaseDate: { lte: new Date() } },
-  });
-  const isRanked = hasReleasedLeaderboard !== null;
-
   const leaderboard = await getLeaderboard(ACTIVE_EVENT_SLUG);
+  const isRanked = leaderboard.some((t) => t.totalScore > 0);
   let currentRank = 0;
   let overallScore = 0;
 

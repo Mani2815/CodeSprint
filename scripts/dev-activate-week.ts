@@ -26,7 +26,6 @@ async function main() {
     data: { 
       isActive: true,
       createdAt: new Date(), // Resets the 7-day submission deadline
-      leaderboardReleaseDate: null, // Keep leaderboard unreleased initially
     },
   });
 

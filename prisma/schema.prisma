@@ -31,6 +31,9 @@ model Event {
   name      String
   slug      String   @unique
   isActive  Boolean  @default(true)
+  timezone  String   @default("+05:30")
+  startDate DateTime?
+  endDate   DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -51,7 +54,10 @@ model Checkpoint {
   order                  Int
   maxScore               Int?
   isActive               Boolean  @default(false)
-  leaderboardReleaseDate DateTime?
+  startDate              DateTime?
+  endDate                DateTime?
+  submissionOpenDate     DateTime?
+  submissionCloseDate    DateTime?
   createdAt              DateTime @default(now())
 
   event            Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -187,6 +193,7 @@ model Evaluation {
   githubScore    Int      @default(0)
   comments       String?
   total          Int      @default(0)
+  isPublished    Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

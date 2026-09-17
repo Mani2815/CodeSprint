@@ -5,6 +5,7 @@ import {
   createWeeklySubmission,
   DuplicateSubmissionError,
   TeamSubmissionAccessError,
+  SubmissionWindowError,
   getTeamSubmissions,
 } from '@/services/submission-service';
 import { z } from 'zod';
@@ -12,7 +13,6 @@ import { getParticipantById, hasAcceptedEthics } from '@/services/participant-se
 import { ETHICS_VERSION } from '@/lib/constants';
 
 import { syncGithubActivity } from '@/services/github-sync-service';
-import { isEventFriday } from '@/lib/date-utils';
 
 const submissionSchema = z.object({
   checkpointId: z.string().min(1, 'Week is required'),
@@ -58,12 +58,6 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    if (!isEventFriday()) {
-      return NextResponse.json(
-        { error: 'Submissions are only allowed on Fridays in the event timezone.' },
-        { status: 403 }
-      );
-    }
 
     const session = await getServerSession(authOptions);
     if (!session || !session.user.participantId || session.user.role === 'revoked') {
@@ -105,7 +99,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data: submission }, { status: 201 });
   } catch (error: unknown) {
-    if (error instanceof DuplicateSubmissionError || error instanceof TeamSubmissionAccessError) {
+    if (error instanceof DuplicateSubmissionError || error instanceof TeamSubmissionAccessError || error instanceof SubmissionWindowError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(

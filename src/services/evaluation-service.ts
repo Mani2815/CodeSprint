@@ -16,6 +16,7 @@ export type EvaluationInput = {
   documentation: number;
   githubScore: number;
   comments?: string | null;
+  isPublished: boolean;
 };
 
 export function evaluationTotal(
@@ -41,16 +42,26 @@ export async function saveEvaluation(input: EvaluationInput) {
       throw new EvaluationScopeError('The team and checkpoint must belong to the same event.');
     }
 
+
+
     const evaluation = await tx.evaluation.upsert({
       where: { teamId_checkpointId: { teamId: input.teamId, checkpointId: input.checkpointId } },
-      create: { ...input, comments: input.comments?.trim() || null, total },
-      update: { ...input, comments: input.comments?.trim() || null, total },
+      create: { ...input, comments: input.comments?.trim() || null, total, isPublished: input.isPublished },
+      update: { ...input, comments: input.comments?.trim() || null, total, isPublished: input.isPublished },
     });
-    await tx.score.upsert({
-      where: { teamId_checkpointId: { teamId: input.teamId, checkpointId: input.checkpointId } },
-      create: { teamId: input.teamId, checkpointId: input.checkpointId, value: total },
-      update: { value: total },
-    });
+    
+    if (input.isPublished) {
+      await tx.score.upsert({
+        where: { teamId_checkpointId: { teamId: input.teamId, checkpointId: input.checkpointId } },
+        create: { teamId: input.teamId, checkpointId: input.checkpointId, value: total },
+        update: { value: total },
+      });
+    } else {
+      await tx.score.deleteMany({
+        where: { teamId: input.teamId, checkpointId: input.checkpointId }
+      });
+    }
+    
     return evaluation;
   });
 }

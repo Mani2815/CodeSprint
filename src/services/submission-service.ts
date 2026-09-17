@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { ACTIVE_EVENT_SLUG, ETHICS_VERSION, EVENT_SCHEDULE } from '@/lib/constants';
+import { ACTIVE_EVENT_SLUG, ETHICS_VERSION } from '@/lib/constants';
 import { getActiveEventId } from '@/services/event-service';
 import { hasAcceptedEthics } from '@/services/participant-service';
 
@@ -80,25 +80,16 @@ export async function createWeeklySubmission(
   if (!checkpoint.isActive) {
     throw new SubmissionWindowError('This submission week is not currently open.');
   }
-  const checkpointOrder = checkpoint.order;
-  let windowStart: Date;
-  let deadline: Date;
 
-  if (checkpointOrder === 1) {
-    windowStart = new Date(EVENT_SCHEDULE.START);
-    deadline = new Date(EVENT_SCHEDULE.WEEK_1_DEADLINE);
-  } else if (checkpointOrder === 2) {
-    windowStart = new Date(EVENT_SCHEDULE.WEEK_1_DEADLINE);
-    deadline = new Date(EVENT_SCHEDULE.WEEK_2_DEADLINE);
-  } else {
-    throw new SubmissionWindowError('Invalid checkpoint.');
+  if (!checkpoint.submissionOpenDate || !checkpoint.submissionCloseDate) {
+    throw new SubmissionWindowError('The submission schedule for this week is not configured.');
   }
 
   const now = Date.now();
-  if (now < windowStart.getTime()) {
+  if (now < checkpoint.submissionOpenDate.getTime()) {
     throw new SubmissionWindowError('The submission window for this week has not opened yet.');
   }
-  if (now > deadline.getTime()) {
+  if (now > checkpoint.submissionCloseDate.getTime()) {
     throw new SubmissionWindowError('The submission deadline for this week has passed.');
   }
 

@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Evaluation } from '@prisma/client';
 
 const score = z.coerce.number().int().min(0).max(20);
@@ -73,13 +73,13 @@ export function EvaluationForm({
 
   const total = calculateTotal();
 
-  async function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues, isPublished: boolean) {
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/evaluations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teamId, checkpointId, ...data }),
+        body: JSON.stringify({ teamId, checkpointId, isPublished, ...data }),
       });
 
       const result = await res.json();
@@ -106,7 +106,7 @@ export function EvaluationForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {rubricFields.map((field) => (
             <FormField
@@ -214,16 +214,32 @@ export function EvaluationForm({
               {total} <span className="text-xl text-muted-foreground">/ 100</span>
             </p>
           </div>
-          <Button type="submit" size="lg" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Save Evaluation'
-            )}
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              disabled={isSubmitting}
+              onClick={form.handleSubmit((data) => onSubmit(data, false))}
+            >
+              Save Draft
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              disabled={isSubmitting}
+              onClick={form.handleSubmit((data) => onSubmit(data, true))}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Publish Evaluation'
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </Form>

@@ -28,6 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/hooks/use-toast';
 import { Checkpoint } from '@prisma/client';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { isSubmissionOpen } from '@/lib/date-utils';
 
 const formSchema = z.object({
   checkpointId: z.string().min(1, 'Please select a week'),
@@ -48,10 +49,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function SubmissionForm({
   activeCheckpoints,
-  isFriday,
 }: {
   activeCheckpoints: Checkpoint[];
-  isFriday: boolean;
 }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -91,6 +90,10 @@ export function SubmissionForm({
   });
 
   const repoUrl = useWatch({ control: form.control, name: 'repositoryUrl' });
+  const selectedCheckpointId = useWatch({ control: form.control, name: 'checkpointId' });
+  
+  const selectedCheckpoint = activeCheckpoints.find(c => c.id === selectedCheckpointId) || activeCheckpoints[0];
+  const isOpen = selectedCheckpoint ? isSubmissionOpen(selectedCheckpoint) : false;
 
   // Reset validation status if URL changes
   React.useEffect(() => {
@@ -173,15 +176,15 @@ export function SubmissionForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!isFriday && (
+        {!isOpen && (
           <div className="mb-6 rounded-md border border-warning/20 bg-warning/10 p-4 text-warning">
             <div className="flex items-center gap-2 font-medium">
               <AlertCircle className="h-5 w-5" />
               Submission Window Locked
             </div>
             <p className="mt-1 text-sm text-warning/90">
-              Submissions open every Friday. You can prepare your submission now, but it can only be
-              submitted on Friday.
+              Submissions are currently closed for this week. You can prepare your submission now, but it can only be
+              submitted when the window is open.
             </p>
           </div>
         )}
@@ -447,7 +450,7 @@ export function SubmissionForm({
               <Button
                 type="submit"
                 size="lg"
-                disabled={isSubmitting || !repoStatus?.isValid || !isFriday}
+                disabled={isSubmitting || !repoStatus?.isValid || !isOpen}
               >
                 {isSubmitting ? (
                   <>

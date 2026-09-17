@@ -1,6 +1,6 @@
 import { requireAdminPageSession } from '@/lib/auth-guards';
 import { getActiveEventId } from '@/services/event-service';
-import { ACTIVE_EVENT_SLUG, EVENT_SCHEDULE } from '@/lib/constants';
+import { ACTIVE_EVENT_SLUG } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
 import { H1, Muted } from '@/components/shared/typography';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,6 +40,7 @@ export default async function AdminGithubActivityPage({
   const teams = await prisma.team.findMany({
     where: { eventId },
     include: {
+      event: true,
       participants: true,
       submissions: {
         where: { checkpointId: activeCheckpointId },
@@ -311,41 +312,45 @@ export default async function AdminGithubActivityPage({
                     </div>
                     <div className="space-y-2">
                       {(() => {
-                        const deadlineIso =
-                          submission.checkpoint.order === 2
-                            ? EVENT_SCHEDULE.WEEK_2_DEADLINE
-                            : EVENT_SCHEDULE.WEEK_1_DEADLINE;
-                        const tzMatch = deadlineIso.match(/([+-]\d{2}):(\d{2})$/);
-                        let offsetMinutes = 0;
-                        if (tzMatch && tzMatch[1] && tzMatch[2]) {
-                          const sign = tzMatch[1][0] === '+' ? 1 : -1;
-                          offsetMinutes =
-                            sign *
-                            (parseInt(tzMatch[1].slice(1), 10) * 60 + parseInt(tzMatch[2], 10));
+                        const openDate = submission.checkpoint.startDate;
+                        const closeDate = submission.checkpoint.endDate || submission.checkpoint.submissionCloseDate;
+                        
+                        if (!openDate || !closeDate) {
+                           return <div className="text-sm text-muted-foreground">Schedule not configured for this week.</div>;
                         }
-                        const fridayTime = new Date(
-                          new Date(deadlineIso).getTime() + offsetMinutes * 60000
-                        ).getTime();
 
-                        const days = [
-                          {
-                            name: 'Monday',
-                            date: new Date(fridayTime - 4 * 86400000).toISOString().slice(0, 10),
-                          },
-                          {
-                            name: 'Tuesday',
-                            date: new Date(fridayTime - 3 * 86400000).toISOString().slice(0, 10),
-                          },
-                          {
-                            name: 'Wednesday',
-                            date: new Date(fridayTime - 2 * 86400000).toISOString().slice(0, 10),
-                          },
-                          {
-                            name: 'Thursday',
-                            date: new Date(fridayTime - 1 * 86400000).toISOString().slice(0, 10),
-                          },
-                          { name: 'Friday', date: new Date(fridayTime).toISOString().slice(0, 10) },
-                        ];
+                        const tzMatch = team.event.timezone.match(/^([+-])(\d{2}):(\d{2})$/);
+                        let offsetMinutes = 0;
+                        if (tzMatch && tzMatch[1] && tzMatch[2] && tzMatch[3]) {
+                          const sign = tzMatch[1] === '+' ? 1 : -1;
+                          const hours = parseInt(tzMatch[2], 10);
+                          const minutes = parseInt(tzMatch[3], 10);
+                          offsetMinutes = sign * (hours * 60 + minutes);
+                        }
+
+                        const days: { name: string; date: string; displayName: string }[] = [];
+                        const start = new Date(openDate.getTime() + offsetMinutes * 60000);
+                        const end = new Date(closeDate.getTime() + offsetMinutes * 60000);
+                        start.setUTCHours(0, 0, 0, 0);
+                        end.setUTCHours(0, 0, 0, 0);
+                        const curr = new Date(start);
+                        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                        
+                        // Limit to 14 days max to avoid huge tables if dates are misconfigured
+                        let limit = 0;
+                        while (curr <= end && limit < 14) {
+                          const dayName = dayNames[curr.getUTCDay()] || 'Unknown';
+                          const dd = curr.getUTCDate().toString().padStart(2, '0');
+                          const mm = (curr.getUTCMonth() + 1).toString().padStart(2, '0');
+                          const yyyy = curr.getUTCFullYear();
+                          days.push({
+                            name: dayName,
+                            date: curr.toISOString().slice(0, 10),
+                            displayName: `${dayName} — ${dd}/${mm}/${yyyy}`,
+                          });
+                          curr.setUTCDate(curr.getUTCDate() + 1);
+                          limit++;
+                        }
 
                         if (!analytics) {
                           return (
@@ -389,8 +394,8 @@ export default async function AdminGithubActivityPage({
                                   const stats = dailyStats[day.date];
                                   const total = stats?.total || 0;
                                   return (
-                                    <tr key={day.name} className="hover:bg-muted/50">
-                                      <td className="w-32 p-3 font-medium">{day.name}</td>
+                                    <tr key={day.date} className="hover:bg-muted/50">
+                                      <td className="w-52 p-3 font-medium">{day.displayName}</td>
                                       <td className="w-28 p-3 text-muted-foreground">
                                         {total} commits
                                       </td>

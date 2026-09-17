@@ -15,6 +15,7 @@ const schema = z.object({
   documentation: score,
   githubScore: score,
   comments: z.string().max(3000).optional().nullable(),
+  isPublished: z.boolean(),
 });
 export async function GET() {
   if (!(await requireAdminSession())) return apiError(401, 'Unauthorized.');

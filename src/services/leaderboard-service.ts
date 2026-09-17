@@ -10,20 +10,12 @@ import type { RankedTeam, TeamWithScores } from '@/types/leaderboard';
  * management screen (Phase 8) so both read from one query shape.
  */
 export async function getTeamsWithScores(
-  eventId: string,
-  includeUnreleased = false
+  eventId: string
 ): Promise<TeamWithScores[]> {
   const teams = await prisma.team.findMany({
     where: { eventId },
     include: {
       scores: {
-        where: includeUnreleased
-          ? undefined
-          : {
-              checkpoint: {
-                leaderboardReleaseDate: { lte: new Date() },
-              },
-            },
         include: { checkpoint: true },
       },
     },

@@ -239,11 +239,9 @@ export async function syncGithubActivity(submissionId?: string) {
     where: submissionId ? { id: submissionId } : {},
     include: {
       team: { include: { participants: { select: { githubUsername: true } } } },
+      checkpoint: true,
     },
   });
-
-  const sprintStartIso = process.env.GITHUB_SPRINT_START_ISO;
-  const startDate = sprintStartIso ? new Date(sprintStartIso) : undefined;
 
   let synced = 0;
   let failed = 0;
@@ -252,8 +250,8 @@ export async function syncGithubActivity(submissionId?: string) {
       const snapshot = await analyzeSubmittedRepository(
         submission.repositoryUrl,
         submission.team.participants.map((member) => member.githubUsername),
-        startDate,
-        undefined
+        submission.checkpoint.startDate || undefined,
+        submission.checkpoint.endDate || submission.checkpoint.submissionCloseDate || undefined
       );
       await prisma.$transaction([
         prisma.submissionAnalytics.upsert({

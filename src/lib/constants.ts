@@ -40,24 +40,7 @@ export const AUTH = {
   REMEMBER_ME_MAX_AGE_SECONDS: 60 * 60 * 24 * 30, // 30 days
 } as const;
 
-/**
- * Placeholder event start date for the homepage countdown. This is a
- * *placeholder* per the brief — organizers should override
- * NEXT_PUBLIC_EVENT_START_DATE with the real CodeSprint start date/time
- * (ISO 8601, e.g. "2026-09-12T09:00:00+05:30") without touching code.
- */
-export const EVENT_START_DATE_ISO =
-  process.env.NEXT_PUBLIC_EVENT_START_DATE ?? '2026-09-11T09:00:00+05:30';
 
-/**
- * Centralized schedule for CodeSprint.
- * The source of truth for submission windows and UI countdowns.
- */
-export const EVENT_SCHEDULE = {
-  START: EVENT_START_DATE_ISO,
-  WEEK_1_DEADLINE: process.env.NEXT_PUBLIC_WEEK_1_DEADLINE ?? '2026-09-18T23:59:59+05:30',
-  WEEK_2_DEADLINE: process.env.NEXT_PUBLIC_WEEK_2_DEADLINE ?? '2026-09-25T23:59:59+05:30',
-} as const;
 
 export const ROUTES = {
   HOME: '/',
@@ -74,6 +57,7 @@ export const ROUTES = {
   ADMIN_EVALUATIONS: '/admin/evaluations',
   ADMIN_SUBMISSIONS: '/admin/submissions',
   ADMIN_GITHUB_ACTIVITY: '/admin/github-activity',
+  ADMIN_EVENT_SCHEDULE: '/admin/event-schedule',
   ADMIN_GITHUB_SYNC: '/admin/github-sync',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   PARTICIPANT_LOGIN: '/login',
