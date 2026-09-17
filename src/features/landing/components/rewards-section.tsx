@@ -19,10 +19,7 @@ const overallWinners = [
     title: 'Runner-Up',
     color: 'text-slate-400',
     bgColor: 'bg-slate-400/10',
-    perks: [
-      'Premium AI Tools Subscription',
-      'Official Runner-Up Certificate',
-    ],
+    perks: ['Premium AI Tools Subscription', 'Official Runner-Up Certificate'],
   },
 ];
 

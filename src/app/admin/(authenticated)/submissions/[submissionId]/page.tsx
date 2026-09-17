@@ -28,14 +28,15 @@ export default async function AdminSubmissionDetailPage({
     ? calculateSuggestedGithubScore(analyticsSnapshot)
     : 0;
 
-  const metrics = Array.isArray(submission.analytics?.memberMetrics)
-    ? (submission.analytics?.memberMetrics as Array<{
+  const rawMetrics = submission.analytics?.memberMetrics as Record<string, unknown> | null;
+  const metrics = Array.isArray(rawMetrics)
+    ? rawMetrics
+    : (rawMetrics?.members as Array<{
         username: string;
         commits: number;
         pullRequests: number;
         contributionPercentage: number;
-      }>)
-    : [];
+      }>) || [];
 
   return (
     <div className="space-y-8 pb-12">

@@ -107,7 +107,7 @@ export function EvaluationForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {rubricFields.map((field) => (
             <FormField
               key={field.name}
@@ -135,7 +135,7 @@ export function EvaluationForm({
                 <FormControl>
                   <Input type="number" min={0} max={20} {...formField} />
                 </FormControl>
-                
+
                 {/* LinkedIn Reference Checklist */}
                 <div className="mt-3 rounded-md border border-border bg-surface/50 p-3">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -153,7 +153,7 @@ export function EvaluationForm({
                     </div>
                   </div>
                 </div>
-                
+
                 <FormMessage />
               </FormItem>
             )}

@@ -64,7 +64,7 @@ export default async function HistoryPage() {
         {checkpoints.map((checkpoint, index) => {
           const submission = submissions.find((s) => s.checkpointId === checkpoint.id);
           const evaluation = evaluations.find((e) => e.checkpointId === checkpoint.id);
-          
+
           const activeIndex = checkpoints.findIndex((c) => c.isActive);
           const isLocked =
             !checkpoint.isActive && !submission && (activeIndex === -1 || index > activeIndex);
@@ -89,7 +89,7 @@ export default async function HistoryPage() {
                   ) : (
                     <Badge
                       variant="secondary"
-                      className="flex items-center gap-1 uppercase bg-destructive/10 text-destructive"
+                      className="bg-destructive/10 text-destructive flex items-center gap-1 uppercase"
                     >
                       <XCircle className="h-3 w-3" /> Missed
                     </Badge>
@@ -102,7 +102,7 @@ export default async function HistoryPage() {
                     {/* Project Info */}
                     <div>
                       <p className="font-semibold text-foreground">Project submitted</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {submission.submittedAt.toLocaleString(undefined, {
                           day: '2-digit',
                           month: 'short',
@@ -126,7 +126,7 @@ export default async function HistoryPage() {
 
                     {/* GitHub Analysis */}
                     <div>
-                      <p className="font-semibold text-foreground mb-2">GitHub Analysis</p>
+                      <p className="mb-2 font-semibold text-foreground">GitHub Analysis</p>
                       {submission.verificationStatus === 'QUEUED' ? (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Loader2 className="h-4 w-4 animate-spin text-warning" />
@@ -134,7 +134,7 @@ export default async function HistoryPage() {
                         </div>
                       ) : submission.analytics ? (
                         <div className="space-y-2">
-                          <div className="flex items-center gap-1 text-sm text-success font-medium">
+                          <div className="flex items-center gap-1 text-sm font-medium text-success">
                             <CheckCircle2 className="h-4 w-4" /> ✓ Completed
                           </div>
                           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -161,8 +161,8 @@ export default async function HistoryPage() {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-sm text-muted-foreground flex items-center gap-2">
-                          <XCircle className="h-4 w-4 text-destructive" />
+                        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <XCircle className="text-destructive h-4 w-4" />
                           Analysis failed or not available.
                         </p>
                       )}
@@ -170,10 +170,10 @@ export default async function HistoryPage() {
 
                     {/* Evaluation */}
                     <div>
-                      <p className="font-semibold text-foreground mb-2">Evaluation</p>
+                      <p className="mb-2 font-semibold text-foreground">Evaluation</p>
                       {evaluation ? (
                         <div className="space-y-2">
-                          <div className="flex items-center gap-1 text-sm text-success font-medium">
+                          <div className="flex items-center gap-1 text-sm font-medium text-success">
                             <CheckCircle2 className="h-4 w-4" /> Reviewed
                           </div>
                           <p className="text-2xl font-bold text-primary">

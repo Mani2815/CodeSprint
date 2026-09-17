@@ -51,7 +51,11 @@ export function GithubRemoveButton() {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/10">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-2"
+        >
           <Trash2 className="h-4 w-4" />
           Remove Repository
         </Button>
@@ -60,7 +64,8 @@ export function GithubRemoveButton() {
         <AlertDialogHeader>
           <AlertDialogTitle>Remove this repository?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will disconnect the current repository from this week's project. You can connect another repository later.
+            This will disconnect the current repository from this week's project. You can connect
+            another repository later.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

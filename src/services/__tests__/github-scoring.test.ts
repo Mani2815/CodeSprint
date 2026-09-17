@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { calculateSuggestedGithubScore, SubmissionAnalyticsSnapshot } from '../github-sync-service';
 
 describe('calculateSuggestedGithubScore', () => {
-  const createSnapshot = (overrides: Partial<SubmissionAnalyticsSnapshot>): SubmissionAnalyticsSnapshot => ({
+  const createSnapshot = (
+    overrides: Partial<SubmissionAnalyticsSnapshot>
+  ): SubmissionAnalyticsSnapshot => ({
     verificationStatus: 'VERIFIED',
     totalCommits: 0,
     pullRequestCount: 0,
@@ -40,10 +42,7 @@ describe('calculateSuggestedGithubScore', () => {
       totalCommits: 3,
       pullRequestCount: 0,
       activeDays: 1,
-      memberMetrics: [
-        { contributionPercentage: 50 },
-        { contributionPercentage: 50 },
-      ],
+      memberMetrics: [{ contributionPercentage: 50 }, { contributionPercentage: 50 }],
     });
     // 1 (commits) + 0 (PRs) + 1 (active days) + 0 (balance, totalCommits < 5) = 2
     expect(calculateSuggestedGithubScore(snapshot)).toBe(2);
@@ -54,10 +53,7 @@ describe('calculateSuggestedGithubScore', () => {
       totalCommits: 10,
       pullRequestCount: 2,
       activeDays: 3,
-      memberMetrics: [
-        { contributionPercentage: 60 },
-        { contributionPercentage: 40 },
-      ],
+      memberMetrics: [{ contributionPercentage: 60 }, { contributionPercentage: 40 }],
     });
     // 3 (commits) + 5 (PRs) + 3 (active days) + 5 (balance diff 10%) = 16
     expect(calculateSuggestedGithubScore(snapshot)).toBe(16);
@@ -68,10 +64,7 @@ describe('calculateSuggestedGithubScore', () => {
       totalCommits: 30,
       pullRequestCount: 10,
       activeDays: 7,
-      memberMetrics: [
-        { contributionPercentage: 51 },
-        { contributionPercentage: 49 },
-      ],
+      memberMetrics: [{ contributionPercentage: 51 }, { contributionPercentage: 49 }],
     });
     // 5 (commits) + 5 (PRs) + 5 (active days) + 5 (balance) = 20
     expect(calculateSuggestedGithubScore(snapshot)).toBe(20);

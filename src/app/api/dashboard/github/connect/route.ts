@@ -22,7 +22,10 @@ export async function POST(req: Request) {
 
     const participant = await getParticipantById(session.user.participantId);
     if (!participant?.teamId || !(await hasAcceptedEthics(participant.id, ETHICS_VERSION))) {
-      return NextResponse.json({ error: 'You are not assigned to a team or have not accepted ethics.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'You are not assigned to a team or have not accepted ethics.' },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();
@@ -36,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const eventId = await getActiveEventId(ACTIVE_EVENT_SLUG);
-    
+
     // Find the currently active checkpoint
     const activeCheckpoint = await prisma.checkpoint.findFirst({
       where: { eventId, isActive: true },
@@ -49,16 +52,21 @@ export async function POST(req: Request) {
 
     // Check if they already submitted
     const existing = await prisma.weeklySubmission.findUnique({
-      where: { teamId_checkpointId: { teamId: participant.teamId, checkpointId: activeCheckpoint.id } },
+      where: {
+        teamId_checkpointId: { teamId: participant.teamId, checkpointId: activeCheckpoint.id },
+      },
     });
 
     let submissionId = '';
 
     if (existing) {
       if (!existing.isDraft) {
-        return NextResponse.json({ error: 'You have already submitted for this week.' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'You have already submitted for this week.' },
+          { status: 400 }
+        );
       }
-      
+
       // Update the draft's repoUrl
       const updated = await prisma.weeklySubmission.update({
         where: { id: existing.id },
@@ -110,7 +118,7 @@ export async function DELETE() {
     }
 
     const eventId = await getActiveEventId(ACTIVE_EVENT_SLUG);
-    
+
     // Find the currently active checkpoint
     const activeCheckpoint = await prisma.checkpoint.findFirst({
       where: { eventId, isActive: true },
@@ -122,7 +130,9 @@ export async function DELETE() {
     }
 
     const existing = await prisma.weeklySubmission.findUnique({
-      where: { teamId_checkpointId: { teamId: participant.teamId, checkpointId: activeCheckpoint.id } },
+      where: {
+        teamId_checkpointId: { teamId: participant.teamId, checkpointId: activeCheckpoint.id },
+      },
     });
 
     if (!existing) {

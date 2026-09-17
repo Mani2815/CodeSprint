@@ -34,7 +34,7 @@ export function GithubConnectForm() {
         title: 'Repository Connected!',
         description: 'We are now analyzing your GitHub activity.',
       });
-      
+
       router.refresh();
     } catch (error: unknown) {
       toast({
@@ -52,11 +52,11 @@ export function GithubConnectForm() {
       <CardContent className="p-8 text-center text-muted-foreground">
         <Github className="mx-auto mb-4 h-10 w-10 opacity-50" />
         <p className="font-medium text-foreground">No repositories connected</p>
-        <p className="mt-1 text-sm mb-6">
+        <p className="mb-6 mt-1 text-sm">
           Connect your project's GitHub repository to start analyzing your team's contributions.
         </p>
 
-        <form onSubmit={onSubmit} className="flex max-w-md mx-auto items-center gap-2">
+        <form onSubmit={onSubmit} className="mx-auto flex max-w-md items-center gap-2">
           <Input
             placeholder="https://github.com/owner/repository"
             value={url}
@@ -67,11 +67,7 @@ export function GithubConnectForm() {
             type="url"
           />
           <Button type="submit" disabled={isSubmitting || !url}>
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Connect'
-            )}
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Connect'}
           </Button>
         </form>
       </CardContent>

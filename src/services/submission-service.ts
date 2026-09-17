@@ -46,8 +46,6 @@ export type SubmissionInput = {
 };
 const clean = (value?: string | null) => value?.trim() || null;
 
-
-
 export async function createWeeklySubmission(
   participantId: string,
   teamId: string,

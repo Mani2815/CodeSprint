@@ -22,10 +22,15 @@ export class GithubUserNotFoundError extends Error {
 
 type RepositoryRef = { owner: string; name: string; url: string };
 type Commit = {
+  sha: string;
   author?: { login?: string | null } | null;
   commit?: { author?: { date?: string | null } | null } | null;
 };
-type PullRequest = { user?: { login?: string | null } | null; created_at?: string; updated_at?: string };
+type PullRequest = {
+  user?: { login?: string | null } | null;
+  created_at?: string;
+  updated_at?: string;
+};
 type Contributor = { login?: string | null; contributions?: number | null };
 type Repository = {
   default_branch?: string | null;
@@ -144,15 +149,26 @@ export async function analyzeSubmittedRepository(
       },
     ])
   );
+
+  const commitHistory: Array<{ sha: string; author: string; timestamp: string }> = [];
+
   for (const commit of commits) {
-    const login = commit.author?.login?.toLowerCase();
+    const login = commit.author?.login?.toLowerCase() || 'unknown';
     const metric = login ? metrics.get(login) : undefined;
-    if (!metric) continue;
-    metric.commits += 1;
     const date = commit.commit?.author?.date ? new Date(commit.commit.author.date) : null;
+
     if (date && !Number.isNaN(date.valueOf())) {
-      metric.activeDays.add(date.toISOString().slice(0, 10));
-      if (!metric.lastCommitAt || date > metric.lastCommitAt) metric.lastCommitAt = date;
+      if (metric) {
+        metric.commits += 1;
+        metric.activeDays.add(date.toISOString().slice(0, 10));
+        if (!metric.lastCommitAt || date > metric.lastCommitAt) metric.lastCommitAt = date;
+      }
+
+      commitHistory.push({
+        sha: commit.sha,
+        author: login,
+        timestamp: date.toISOString(),
+      });
     }
   }
   for (const pullRequest of pullRequests) {
@@ -178,7 +194,7 @@ export async function analyzeSubmittedRepository(
         : latest,
     null
   );
-  const memberMetrics = members.map((member) => ({
+  const memberMetricsArray = members.map((member) => ({
     username: member.username,
     commits: member.commits,
     pullRequests: member.pullRequests,
@@ -188,6 +204,10 @@ export async function analyzeSubmittedRepository(
       : 0,
     lastCommitAt: member.lastCommitAt?.toISOString() ?? null,
   }));
+  const memberMetrics = {
+    members: memberMetricsArray,
+    commits: commitHistory,
+  };
   const repositoryContributors = contributors.map((contributor) => ({
     username: contributor.login ?? 'unknown',
     contributions: contributor.contributions ?? 0,
@@ -217,14 +237,14 @@ export async function analyzeSubmittedRepository(
 export async function syncGithubActivity(submissionId?: string) {
   const submissions = await prisma.weeklySubmission.findMany({
     where: submissionId ? { id: submissionId } : {},
-    include: { 
+    include: {
       team: { include: { participants: { select: { githubUsername: true } } } },
     },
   });
-  
+
   const sprintStartIso = process.env.GITHUB_SPRINT_START_ISO;
   const startDate = sprintStartIso ? new Date(sprintStartIso) : undefined;
-  
+
   let synced = 0;
   let failed = 0;
   for (const submission of submissions) {
@@ -295,7 +315,10 @@ export function calculateSuggestedGithubScore(analytics: SubmissionAnalyticsSnap
   else if (analytics.activeDays === 1) score += 1;
 
   // 4. Team Contribution Balance (max 5)
-  const metrics = analytics.memberMetrics as Array<{ contributionPercentage: number }>;
+  const rawMetrics = analytics.memberMetrics as Record<string, unknown> | null;
+  const metrics = (Array.isArray(rawMetrics) ? rawMetrics : rawMetrics?.members || []) as Array<{
+    contributionPercentage: number;
+  }>;
   if (analytics.totalCommits >= 5 && metrics && metrics.length > 0) {
     const percentages = metrics.map((m) => m.contributionPercentage);
     const max = Math.max(...percentages);

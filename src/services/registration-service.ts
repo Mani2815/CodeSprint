@@ -135,7 +135,7 @@ export async function approveRegistration(id: string) {
       });
       for (const member of registration.members) {
         const githubUsername = member.githubUsername;
-        
+
         // Find if they already have an account (could be a real githubId from a previous team that was deleted)
         const existingParticipant = await tx.participant.findFirst({
           where: { githubUsername: { equals: githubUsername, mode: 'insensitive' } },

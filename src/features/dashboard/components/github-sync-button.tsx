@@ -35,10 +35,10 @@ export function GithubSyncButton() {
   }
 
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
-      onClick={handleSync} 
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleSync}
       disabled={isSyncing}
       className="flex items-center gap-2"
     >

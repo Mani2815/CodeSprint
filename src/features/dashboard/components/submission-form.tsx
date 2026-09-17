@@ -59,13 +59,13 @@ export function SubmissionForm({
   const [repoStatus, setRepoStatus] = React.useState<
     | null
     | {
-      isValid: true;
-      name: string;
-      owner: string;
-      language: string;
-      updatedAt: string;
-      visibility: string;
-    }
+        isValid: true;
+        name: string;
+        owner: string;
+        language: string;
+        updatedAt: string;
+        visibility: string;
+      }
     | { isValid: false; error: string }
   >(null);
 

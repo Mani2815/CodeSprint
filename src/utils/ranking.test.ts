@@ -51,8 +51,6 @@ describe('rankTeams', () => {
     expect(result.map((t) => t.name)).toEqual(['Bravo', 'Alpha']);
   });
 
-
-
   it('ranks the earlier-created team higher when every checkpoint ties exactly', () => {
     const teams = [
       team('a', 'Alpha (created later)', '2026-01-02', [{ checkpointOrder: 1, value: 100 }]),

@@ -20,7 +20,7 @@ export function TimelineSection() {
               {index < TIMELINE_STEPS.length - 1 && (
                 <div
                   aria-hidden
-                  className="absolute left-[3rem] right-[-1.5rem] top-6 hidden h-px bg-border/80 md:block -z-10"
+                  className="absolute left-[3rem] right-[-1.5rem] top-6 -z-10 hidden h-px bg-border/80 md:block"
                 />
               )}
               <div className="mb-6 flex size-12 shrink-0 items-center justify-center self-center rounded-full border-[4px] border-background bg-primary text-primary-foreground shadow-sm md:self-start">

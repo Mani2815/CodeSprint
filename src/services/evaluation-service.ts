@@ -21,13 +21,7 @@ export type EvaluationInput = {
 export function evaluationTotal(
   input: Omit<EvaluationInput, 'teamId' | 'checkpointId' | 'comments'>
 ) {
-  return (
-    input.innovation +
-    input.technical +
-    input.ui +
-    input.documentation +
-    input.githubScore
-  );
+  return input.innovation + input.technical + input.ui + input.documentation + input.githubScore;
 }
 
 /** Saves rubric detail and its leaderboard total atomically. */
