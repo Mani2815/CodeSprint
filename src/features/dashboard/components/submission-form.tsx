@@ -40,8 +40,8 @@ const formSchema = z.object({
   aiToolsUsed: z.string().optional(),
   repositoryUrl: z.string().url('Must be a valid URL'),
   demoUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  demoVideoUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  presentationUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  demoVideoUrl: z.string().url('Must be a valid URL'),
+  presentationUrl: z.string().url('Must be a valid URL'),
   additionalNotes: z.string().optional(),
 });
 
@@ -58,13 +58,13 @@ export function SubmissionForm({
   const [repoStatus, setRepoStatus] = React.useState<
     | null
     | {
-        isValid: true;
-        name: string;
-        owner: string;
-        language: string;
-        updatedAt: string;
-        visibility: string;
-      }
+      isValid: true;
+      name: string;
+      owner: string;
+      language: string;
+      updatedAt: string;
+      visibility: string;
+    }
     | { isValid: false; error: string }
   >(null);
 
@@ -91,7 +91,7 @@ export function SubmissionForm({
 
   const repoUrl = useWatch({ control: form.control, name: 'repositoryUrl' });
   const selectedCheckpointId = useWatch({ control: form.control, name: 'checkpointId' });
-  
+
   const selectedCheckpoint = activeCheckpoints.find(c => c.id === selectedCheckpointId) || activeCheckpoints[0];
   const isOpen = selectedCheckpoint ? isSubmissionOpen(selectedCheckpoint) : false;
 
@@ -402,7 +402,7 @@ export function SubmissionForm({
                   name="demoVideoUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Demo Video URL (Optional)</FormLabel>
+                      <FormLabel>Demo Video URL * (Attach Google Drive Link)</FormLabel>
                       <FormControl>
                         <Input placeholder="https://youtube.com/..." {...field} />
                       </FormControl>
@@ -415,7 +415,7 @@ export function SubmissionForm({
                   name="presentationUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>LinkedIn Post (Optional)</FormLabel>
+                      <FormLabel>LinkedIn Post *</FormLabel>
                       <FormControl>
                         <Input placeholder="https://linkedin.com/post/..." {...field} />
                       </FormControl>

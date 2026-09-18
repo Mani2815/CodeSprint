@@ -40,8 +40,8 @@ export type SubmissionInput = {
   aiToolsUsed?: string | null;
   repositoryUrl: string;
   demoUrl?: string | null;
-  demoVideoUrl?: string | null;
-  presentationUrl?: string | null;
+  demoVideoUrl: string;
+  presentationUrl: string;
   additionalNotes?: string | null;
 };
 const clean = (value?: string | null) => value?.trim() || null;
