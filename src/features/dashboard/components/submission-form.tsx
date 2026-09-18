@@ -404,7 +404,7 @@ export function SubmissionForm({
                     <FormItem>
                       <FormLabel>Demo Video URL * (Attach Google Drive Link)</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://youtube.com/..." {...field} />
+                        <Input placeholder="https://drive.google.com/video/..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
