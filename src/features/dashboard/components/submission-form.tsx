@@ -40,7 +40,7 @@ const formSchema = z.object({
   aiToolsUsed: z.string().optional(),
   repositoryUrl: z.string().url('Must be a valid URL'),
   demoUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  demoVideoUrl: z.string().url('Must be a valid URL'),
+  demoVideoUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   presentationUrl: z.string().url('Must be a valid URL'),
   additionalNotes: z.string().optional(),
 });
@@ -402,7 +402,7 @@ export function SubmissionForm({
                   name="demoVideoUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Demo Video URL * (Attach Google Drive Link)</FormLabel>
+                      <FormLabel>Demo Video URL (Optional - Attach Google Drive Link)</FormLabel>
                       <FormControl>
                         <Input placeholder="https://drive.google.com/video/..." {...field} />
                       </FormControl>

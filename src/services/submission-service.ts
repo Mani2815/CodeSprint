@@ -40,7 +40,7 @@ export type SubmissionInput = {
   aiToolsUsed?: string | null;
   repositoryUrl: string;
   demoUrl?: string | null;
-  demoVideoUrl: string;
+  demoVideoUrl?: string | null;
   presentationUrl: string;
   additionalNotes?: string | null;
 };

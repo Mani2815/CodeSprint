@@ -24,7 +24,7 @@ const submissionSchema = z.object({
   aiToolsUsed: z.string().optional().or(z.literal('')),
   repositoryUrl: z.string().url('Invalid repository URL'),
   demoUrl: z.string().url('Invalid demo URL').optional().or(z.literal('')),
-  demoVideoUrl: z.string().url('Invalid video URL'),
+  demoVideoUrl: z.string().url('Invalid video URL').optional().or(z.literal('')),
   presentationUrl: z.string().url('Invalid presentation URL'),
   additionalNotes: z.string().optional(),
 });
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     const inputData = {
       ...parsed.data,
       demoUrl: parsed.data.demoUrl || null,
-      demoVideoUrl: parsed.data.demoVideoUrl,
+      demoVideoUrl: parsed.data.demoVideoUrl || null,
       presentationUrl: parsed.data.presentationUrl,
       additionalNotes: parsed.data.additionalNotes || null,
       aiToolsUsed: parsed.data.aiToolsUsed || null,
