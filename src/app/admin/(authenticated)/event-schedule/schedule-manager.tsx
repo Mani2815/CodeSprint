@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Event, Checkpoint } from '@prisma/client';
-import { formatDateWithWeekday } from '@/lib/date-utils';
+import { formatDateWithWeekday, getZonedDateString, getUtcStringFromZonedString } from '@/lib/date-utils';
 
 type CheckpointConfig = Checkpoint & {
   label: string;
@@ -24,15 +24,15 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
   const [isSaving, setIsSaving] = React.useState(false);
   const getInitialFormData = () => ({
     timezone: initialEvent.timezone || '+05:30',
-    startDate: initialEvent.startDate ? new Date(initialEvent.startDate).toISOString().slice(0, 16) : '',
-    endDate: initialEvent.endDate ? new Date(initialEvent.endDate).toISOString().slice(0, 16) : '',
+    startDate: initialEvent.startDate ? new Date(initialEvent.startDate).toISOString() : '',
+    endDate: initialEvent.endDate ? new Date(initialEvent.endDate).toISOString() : '',
     checkpoints: initialEvent.checkpoints.map((cp) => ({
       id: cp.id,
       label: cp.label,
-      startDate: cp.startDate ? new Date(cp.startDate).toISOString().slice(0, 16) : '',
-      endDate: cp.endDate ? new Date(cp.endDate).toISOString().slice(0, 16) : '',
-      submissionOpenDate: cp.submissionOpenDate ? new Date(cp.submissionOpenDate).toISOString().slice(0, 16) : '',
-      submissionCloseDate: cp.submissionCloseDate ? new Date(cp.submissionCloseDate).toISOString().slice(0, 16) : '',
+      startDate: cp.startDate ? new Date(cp.startDate).toISOString() : '',
+      endDate: cp.endDate ? new Date(cp.endDate).toISOString() : '',
+      submissionOpenDate: cp.submissionOpenDate ? new Date(cp.submissionOpenDate).toISOString() : '',
+      submissionCloseDate: cp.submissionCloseDate ? new Date(cp.submissionCloseDate).toISOString() : '',
     })),
   });
 
@@ -45,15 +45,27 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
   };
 
   const handleEventChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === 'datetime-local') {
+      const defaultTime = name.toLowerCase().includes('end') || name.toLowerCase().includes('close') ? 'end' : 'start';
+      const utcValue = getUtcStringFromZonedString(value, formData.timezone, defaultTime) || '';
+      setFormData((prev) => ({ ...prev, [name]: utcValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCheckpointChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setFormData((prev) => {
       const newCheckpoints = [...prev.checkpoints];
-      newCheckpoints[index] = { ...newCheckpoints[index], [name]: value } as typeof newCheckpoints[0];
+      if (type === 'datetime-local') {
+        const defaultTime = name.toLowerCase().includes('end') || name.toLowerCase().includes('close') ? 'end' : 'start';
+        const utcValue = getUtcStringFromZonedString(value, prev.timezone, defaultTime) || '';
+        newCheckpoints[index] = { ...newCheckpoints[index], [name]: utcValue } as typeof newCheckpoints[0];
+      } else {
+        newCheckpoints[index] = { ...newCheckpoints[index], [name]: value } as typeof newCheckpoints[0];
+      }
       return { ...prev, checkpoints: newCheckpoints };
     });
   };
@@ -64,14 +76,14 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
     try {
       const payload = {
         timezone: formData.timezone,
-        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
-        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
+        startDate: formData.startDate || null,
+        endDate: formData.endDate || null,
         checkpoints: formData.checkpoints.map((cp) => ({
           id: cp.id,
-          startDate: cp.startDate ? new Date(cp.startDate).toISOString() : null,
-          endDate: cp.endDate ? new Date(cp.endDate).toISOString() : null,
-          submissionOpenDate: cp.submissionOpenDate ? new Date(cp.submissionOpenDate).toISOString() : null,
-          submissionCloseDate: cp.submissionCloseDate ? new Date(cp.submissionCloseDate).toISOString() : null,
+          startDate: cp.startDate || null,
+          endDate: cp.endDate || null,
+          submissionOpenDate: cp.submissionOpenDate || null,
+          submissionCloseDate: cp.submissionCloseDate || null,
         })),
       };
 
@@ -125,7 +137,7 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
               <Label htmlFor="startDate">Event Start Date</Label>
               {isEditing ? (
                 <>
-                  <Input type="datetime-local" id="startDate" name="startDate" value={formData.startDate} onChange={handleEventChange} />
+                  <Input type="datetime-local" id="startDate" name="startDate" value={getZonedDateString(formData.startDate, formData.timezone)} onChange={handleEventChange} />
                   {formData.startDate && <p className="text-xs text-muted-foreground">{formatDateWithWeekday(formData.startDate, formData.timezone)}</p>}
                 </>
               ) : (
@@ -136,7 +148,7 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
               <Label htmlFor="endDate">Event End Date</Label>
               {isEditing ? (
                 <>
-                  <Input type="datetime-local" id="endDate" name="endDate" value={formData.endDate} onChange={handleEventChange} />
+                  <Input type="datetime-local" id="endDate" name="endDate" value={getZonedDateString(formData.endDate, formData.timezone)} onChange={handleEventChange} />
                   {formData.endDate && <p className="text-xs text-muted-foreground">{formatDateWithWeekday(formData.endDate, formData.timezone)}</p>}
                 </>
               ) : (
@@ -157,7 +169,7 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
               <Label>Start Date</Label>
               {isEditing ? (
                 <>
-                  <Input type="datetime-local" name="startDate" value={cp.startDate} onChange={(e) => handleCheckpointChange(i, e)} />
+                  <Input type="datetime-local" name="startDate" value={getZonedDateString(cp.startDate, formData.timezone)} onChange={(e) => handleCheckpointChange(i, e)} />
                   {cp.startDate && <p className="text-xs text-muted-foreground">{formatDateWithWeekday(cp.startDate, formData.timezone)}</p>}
                 </>
               ) : (
@@ -168,7 +180,7 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
               <Label>End Date</Label>
               {isEditing ? (
                 <>
-                  <Input type="datetime-local" name="endDate" value={cp.endDate || ''} onChange={(e) => handleCheckpointChange(i, e)} />
+                  <Input type="datetime-local" name="endDate" value={getZonedDateString(cp.endDate, formData.timezone)} onChange={(e) => handleCheckpointChange(i, e)} />
                   {cp.endDate && <p className="text-xs text-muted-foreground">{formatDateWithWeekday(cp.endDate, formData.timezone)}</p>}
                 </>
               ) : (
@@ -179,7 +191,7 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
               <Label>Submission Window Opens</Label>
               {isEditing ? (
                 <>
-                  <Input type="datetime-local" name="submissionOpenDate" value={cp.submissionOpenDate} onChange={(e) => handleCheckpointChange(i, e)} />
+                  <Input type="datetime-local" name="submissionOpenDate" value={getZonedDateString(cp.submissionOpenDate, formData.timezone)} onChange={(e) => handleCheckpointChange(i, e)} />
                   {cp.submissionOpenDate && <p className="text-xs text-muted-foreground">{formatDateWithWeekday(cp.submissionOpenDate, formData.timezone)}</p>}
                 </>
               ) : (
@@ -190,7 +202,7 @@ export function ScheduleManager({ initialEvent }: { initialEvent: EventConfig })
               <Label>Submission Deadline</Label>
               {isEditing ? (
                 <>
-                  <Input type="datetime-local" name="submissionCloseDate" value={cp.submissionCloseDate} onChange={(e) => handleCheckpointChange(i, e)} />
+                  <Input type="datetime-local" name="submissionCloseDate" value={getZonedDateString(cp.submissionCloseDate, formData.timezone)} onChange={(e) => handleCheckpointChange(i, e)} />
                   {cp.submissionCloseDate && <p className="text-xs text-muted-foreground">{formatDateWithWeekday(cp.submissionCloseDate, formData.timezone)}</p>}
                 </>
               ) : (
