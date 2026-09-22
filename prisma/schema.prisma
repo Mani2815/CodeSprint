@@ -186,13 +186,17 @@ model Evaluation {
   id             String   @id @default(cuid())
   teamId         String
   checkpointId   String
-  innovation     Int      @default(0)
-  technical      Int      @default(0)
-  ui             Int      @default(0)
-  documentation  Int      @default(0)
-  githubScore    Int      @default(0)
-  comments       String?
-  total          Int      @default(0)
+  innovation           Int      @default(0)
+  technical            Int      @default(0)
+  ui                   Int      @default(0)
+  documentation        Int      @default(0)
+  problemUnderstanding Int      @default(0)
+  functionality        Int      @default(0)
+  impact               Int      @default(0)
+  timelySubmission     Int      @default(0)
+  githubScore          Int      @default(0)
+  comments             String?
+  total                Int      @default(0)
   isPublished    Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

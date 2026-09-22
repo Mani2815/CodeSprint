@@ -5,15 +5,20 @@ import { apiError, apiSuccess, handleApiError } from '@/lib/api-response';
 import { listEvaluations, saveEvaluation } from '@/services/evaluation-service';
 import { getActiveEventId } from '@/services/event-service';
 import { ACTIVE_EVENT_SLUG } from '@/lib/constants';
-const score = z.number().int().min(0).max(20);
+const score10 = z.number().int().min(0).max(10);
+const score20 = z.number().int().min(0).max(20);
 const schema = z.object({
   teamId: z.string().min(1),
   checkpointId: z.string().min(1),
-  innovation: score,
-  technical: score,
-  ui: score,
-  documentation: score,
-  githubScore: score,
+  problemUnderstanding: score10,
+  innovation: score10,
+  functionality: score10,
+  technical: score10,
+  ui: score10,
+  documentation: score10,
+  impact: score10,
+  timelySubmission: score10,
+  githubScore: score20,
   comments: z.string().max(3000).optional().nullable(),
   isPublished: z.boolean(),
 });

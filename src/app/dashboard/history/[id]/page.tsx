@@ -166,26 +166,68 @@ export default async function SubmissionDetailPage({ params }: { params: { id: s
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
-                      <span className="text-muted-foreground">Innovation & Problem Solving</span>
-                      <span className="font-medium">{evaluation.innovation}</span>
+                  <div className="space-y-6 text-sm">
+                    {/* Project Evaluation */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-muted-foreground mb-3 text-xs uppercase tracking-wider">
+                        Project Evaluation — 70
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">Problem Understanding</span>
+                          <span className="font-medium">{evaluation.problemUnderstanding}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">Innovation & Creativity</span>
+                          <span className="font-medium">{evaluation.innovation}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">Functionality & Completeness</span>
+                          <span className="font-medium">{evaluation.functionality}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">Technical Implementation</span>
+                          <span className="font-medium">{evaluation.technical}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">UI/UX & Design</span>
+                          <span className="font-medium">{evaluation.ui}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">Documentation & Code Quality</span>
+                          <span className="font-medium">{evaluation.documentation}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                          <span className="text-muted-foreground">Impact, Practicality & SDG</span>
+                          <span className="font-medium">{evaluation.impact}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
-                      <span className="text-muted-foreground">Technical Implementation</span>
-                      <span className="font-medium">{evaluation.technical}</span>
+
+                    <Separator />
+
+                    {/* GitHub & Team */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-primary mb-3 text-xs uppercase tracking-wider">
+                        GitHub Activity & Team Contribution — 20
+                      </h4>
+                      <div className="flex items-center justify-between rounded-md border border-primary/20 bg-primary/5 p-3">
+                        <span className="font-semibold text-primary">GitHub & Collaboration</span>
+                        <span className="font-bold text-primary">{evaluation.githubScore}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
-                      <span className="text-muted-foreground">UI/UX & Design</span>
-                      <span className="font-medium">{evaluation.ui}</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
-                      <span className="text-muted-foreground">Documentation & LinkedIn</span>
-                      <span className="font-medium">{evaluation.documentation}</span>
-                    </div>
-                    <div className="col-span-2 flex items-center justify-between rounded-md border border-primary/20 bg-primary/5 p-3">
-                      <span className="font-semibold text-primary">GitHub & Collaboration</span>
-                      <span className="font-bold text-primary">{evaluation.githubScore}</span>
+
+                    <Separator />
+
+                    {/* Timeliness & Consistency */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-muted-foreground mb-3 text-xs uppercase tracking-wider">
+                        Timely Submission & Consistency — 10
+                      </h4>
+                      <div className="flex items-center justify-between rounded-md bg-surface/30 p-3">
+                        <span className="text-muted-foreground">Timeliness</span>
+                        <span className="font-medium">{evaluation.timelySubmission}</span>
+                      </div>
                     </div>
                   </div>
 

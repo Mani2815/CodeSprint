@@ -10,10 +10,14 @@ export class EvaluationScopeError extends Error {
 export type EvaluationInput = {
   teamId: string;
   checkpointId: string;
+  problemUnderstanding: number;
   innovation: number;
+  functionality: number;
   technical: number;
   ui: number;
   documentation: number;
+  impact: number;
+  timelySubmission: number;
   githubScore: number;
   comments?: string | null;
   isPublished: boolean;
@@ -22,7 +26,17 @@ export type EvaluationInput = {
 export function evaluationTotal(
   input: Omit<EvaluationInput, 'teamId' | 'checkpointId' | 'comments'>
 ) {
-  return input.innovation + input.technical + input.ui + input.documentation + input.githubScore;
+  return (
+    input.problemUnderstanding +
+    input.innovation +
+    input.functionality +
+    input.technical +
+    input.ui +
+    input.documentation +
+    input.impact +
+    input.githubScore +
+    input.timelySubmission
+  );
 }
 
 /** Saves rubric detail and its leaderboard total atomically. */

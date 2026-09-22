@@ -1,29 +1,44 @@
-import { Lightbulb, Code2, Layout, Linkedin, BookOpen, Users } from 'lucide-react';
+import { Lightbulb, Code2, Layout, BookOpen, Users, CheckSquare, Globe2, Target, Github, Clock } from 'lucide-react';
 import { Reveal, Stagger, StaggerItem } from '@/components/shared/motion';
 import { Eyebrow, H2, Text } from '@/components/shared/typography';
 
 const criteria = [
   {
+    icon: Target,
+    title: 'Problem Understanding',
+    description: 'Clarity and relevance of the problem being solved.',
+  },
+  {
     icon: Lightbulb,
-    title: 'Innovation',
+    title: 'Innovation & Creativity',
     description: 'Originality and creativity of the solution.',
+  },
+  {
+    icon: CheckSquare,
+    title: 'Functionality',
+    description: 'Working features, completeness, and correctness.',
   },
   {
     icon: Code2,
     title: 'Technical Implementation',
-    description: 'Code quality, architecture, and complexity.',
+    description: 'Architecture, code quality, and technology choices.',
   },
-  { icon: Layout, title: 'UI/UX', description: 'Design, usability, and user experience.' },
+  { icon: Layout, title: 'UI/UX & Design', description: 'Design, usability, and responsiveness.' },
+  { icon: BookOpen, title: 'Documentation', description: 'README quality and code clarity.' },
   {
-    icon: Linkedin,
-    title: 'LinkedIn Post',
-    description: 'Post your project on LinkedIn and mention CUCS & Labyrinth.',
+    icon: Globe2,
+    title: 'Impact & Practicality',
+    description: 'Real-world impact and SDG alignment.',
   },
-  { icon: BookOpen, title: 'Documentation', description: 'README quality and code documentation.' },
   {
-    icon: Users,
-    title: 'Team Collaboration',
-    description: 'Effective distribution of work and Git usage.',
+    icon: Github,
+    title: 'GitHub & Team Contribution',
+    description: 'Commit activity, PRs, and meaningful contribution from both members.',
+  },
+  {
+    icon: Clock,
+    title: 'Timely Submission',
+    description: 'Submitting within the configured window and maintaining consistent progress.',
   },
 ];
 
@@ -33,9 +48,9 @@ export function EvaluationCriteriaSection() {
       <div className="container py-20 sm:py-28">
         <Reveal className="mx-auto max-w-2xl text-center">
           <Eyebrow>Evaluation</Eyebrow>
-          <H2 className="mt-3">How You're Scored</H2>
+          <H2 className="mt-3">How You're Scored (100 Marks)</H2>
           <Text className="mt-3 text-muted-foreground">
-            Teams are evaluated weekly by a panel of faculty members across six key dimensions.
+            Teams are evaluated on a 100-mark rubric covering Project Evaluation (70), GitHub Activity (20), and Timeliness (10).
           </Text>
         </Reveal>
 

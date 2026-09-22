@@ -166,6 +166,11 @@ export default async function AdminSubmissionDetailPage({
               checkpointId={submission.checkpointId}
               initialData={evaluation}
               suggestedGithubScore={suggestedGithubScore}
+              submissionTimestamps={{
+                submittedAt: submission.submittedAt,
+                openDate: submission.checkpoint.submissionOpenDate,
+                closeDate: submission.checkpoint.submissionCloseDate,
+              }}
             />
           </section>
         </div>
